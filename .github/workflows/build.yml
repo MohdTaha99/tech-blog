@@ -1,0 +1,35 @@
+name: Build and Deploy Hugo Site
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    # Configure AWS credentials using the hardcoded IAM role and region
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        role-to-assume: arn:aws:iam::863518417115:role/new_one
+        aws-region: eu-west-1
+
+    - name: Install Hugo
+      run: |
+        wget https://github.com/gohugoio/hugo/releases/download/v0.92.2/hugo_extended_0.92.2_Linux-64bit.tar.gz
+        tar -zxvf hugo_extended_0.92.2_Linux-64bit.tar.gz
+        sudo mv hugo /usr/local/bin/
+
+    - name: Build the Site
+      run: hugo
+
+    # Optional: Deploy to S3 or another AWS service
+    # - name: Deploy to S3
+    #   run: |
+    #     aws s3 sync public/ s3://your-s3-bucket-name --delete
