@@ -10,26 +10,35 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    # Step 1: Checkout the code from the repository
     - name: Checkout Code
       uses: actions/checkout@v3
 
-    # Configure AWS credentials using the hardcoded IAM role and region
+    # Step 2: Configure AWS credentials using the hardcoded IAM role and region
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
         role-to-assume: arn:aws:iam::863518417115:role/new_one
         aws-region: eu-west-1
 
+    # Step 3: Install Hugo
     - name: Install Hugo
       run: |
         wget https://github.com/gohugoio/hugo/releases/download/v0.92.2/hugo_extended_0.92.2_Linux-64bit.tar.gz
         tar -zxvf hugo_extended_0.92.2_Linux-64bit.tar.gz
         sudo mv hugo /usr/local/bin/
 
+    # Step 4: Build the Hugo site
     - name: Build the Site
       run: hugo
 
-    Optional: Deploy to S3 or another AWS service
+    # Step 5: Deploy the generated site to S3
     - name: Deploy to S3
       run: |
         aws s3 sync public/ s3://newhostingsite --delete
+
+    # Step 6: Invalidate CloudFront cache to ensure changes are visible
+    - name: Invalidate CloudFront Cache
+      run: |
+        aws cloudfront create-invalidation --distribution-id YOUR_CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
+
